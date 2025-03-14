@@ -2,38 +2,66 @@ package main
 
 import (
 	"encoding/csv"
+	"fmt"
 	"log"
 	"os"
+	"strings"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/gocolly/colly"
-	"github.com/seheraksam/Multi-Threading-Project/models"
 )
 
 var C *colly.Collector
-var Products []models.Product
 
 func main() {
-	C = colly.NewCollector(
-		colly.AllowedDomains("www.scrapingcourse.com"),
-	)
-	C.Visit("https://www.scrapingcourse.com/ecommerce")
+	// Create a new Colly collector
+	C = colly.NewCollector()
 
-	C.OnHTML("li.product", func(e *colly.HTMLElement) {
+	// Define the URL you want to scrape
+	url := "http://quotes.toscrape.com/page/1/"
 
-		// initialize a new Product instance
-		product := models.Product{}
+	// Set up callbacks to handle scraping events
+	C.OnHTML(".quote", func(e *colly.HTMLElement) {
+		file, err := os.Create("productsare.csv")
+		if err != nil {
+			log.Fatalln("Failed to create output CSV file", err)
+		}
+		defer file.Close()
 
-		// scrape the target data
-		product.Url = e.ChildAttr("a", "href")
-		product.Image = e.ChildAttr("img", "src")
-		product.Name = e.ChildText(".product-name")
-		product.Price = e.ChildText(".price")
-		spew.Dump(Products)
-		// add the product instance with scraped data to the list of products
-		Products = append(Products, product)
+		writer := csv.NewWriter(file)
+		headers := []string{
+			"Quote",
+			"Author",
+			"Tags",
+		}
+		writer.Write(headers)
+		// Extract data from HTML elements
+		quote := e.ChildText("span.text")
+		author := e.ChildText("small.author")
+		tags := e.ChildText("div.tags")
 
+		// Clean up the extracted data
+		quote = strings.TrimSpace(quote)
+		author = strings.TrimSpace(author)
+		tags = strings.TrimSpace(tags)
+		for i := 0; i < 10; i++ {
+			record := []string{
+				quote,
+				author,
+				tags,
+			}
+			writer.Write(record)
+		}
+
+		defer writer.Flush()
+		// Print the scraped data
+		fmt.Printf("Quote: %s\nAuthor: %s\nTags: %s\n\n", quote, author, tags)
 	})
+
+	// Visit the URL and start scraping
+	err := C.Visit(url)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func Scraper() {
@@ -57,17 +85,5 @@ func Scraper() {
 		}
 		writer.Write(headers)
 
-		for _, product := range Products {
-
-			record := []string{
-				product.Url,
-				product.Image,
-				product.Name,
-				product.Price,
-			}
-			writer.Write(record)
-		}
-
-		defer writer.Flush()
 	})
 }
