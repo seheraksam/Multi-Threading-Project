@@ -13,7 +13,6 @@ func init() {
 
 func main() {
 	r := gin.Default()
-
 	r.GET("/scrape", controllers.GetTitle)
 
 	r.Run(":8080")

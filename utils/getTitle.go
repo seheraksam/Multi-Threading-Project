@@ -59,6 +59,6 @@ func FetchTitle(url string) (string, error) {
 	// Cache'e ekle (5 dakika boyunca)
 	initializers.RedisClient.Set(ctx, url, title, 5*time.Minute)
 
-	fmt.Println("🟢 Web Scraper ile alındı:", url)
+	fmt.Println(" Web Scraper ile alındı:", url)
 	return title, nil
 }

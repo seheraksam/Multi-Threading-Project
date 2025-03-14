@@ -37,12 +37,11 @@ func ConnectRedis() {
 	ctx := context.Background()
 
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "redis-19470.crce176.me-central-1-1.ec2.redns.redis-cloud.com:19470",
-		Username: "default",
-		Password: "*******", // Şifrenizi burada kullanın
+		Addr:     "localhost:6379",
+		Password: "",
 		DB:       0,
 	})
-
+	fmt.Println(rdb)
 	rdb.Set(ctx, "foo", "bar", 0)
 	result, err := rdb.Get(ctx, "foo").Result()
 
