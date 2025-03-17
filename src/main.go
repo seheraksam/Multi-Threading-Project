@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/csv"
 	"fmt"
 	"log"
@@ -8,11 +9,22 @@ import (
 	"strings"
 
 	"github.com/gocolly/colly"
+	"github.com/seheraksam/Multi-Threading-Project/database"
+	"github.com/seheraksam/Multi-Threading-Project/models"
 )
 
 var C *colly.Collector
 
+func init() {
+	database.ConnecttoMongo()
+}
+
 func main() {
+	err := database.Client.Ping(context.TODO(), nil)
+	if err != nil {
+		log.Fatalf("MongoDB'ye ping atılamadı: %v", err)
+	}
+
 	// Create a new Colly collector
 	C = colly.NewCollector()
 
@@ -49,6 +61,18 @@ func main() {
 				author,
 				tags,
 			}
+			secord := models.Product{
+				Quote:  quote,
+				Author: author,
+				Tags:   tags,
+			}
+			_, err = database.Client.Database("product").Collection("products").InsertOne(context.TODO(), secord)
+			if err != nil {
+				fmt.Println("Error inserting news:", err)
+			}
+			if err != nil {
+				fmt.Println("Error inserting news:", err)
+			}
 			writer.Write(record)
 		}
 
@@ -58,7 +82,7 @@ func main() {
 	})
 
 	// Visit the URL and start scraping
-	err := C.Visit(url)
+	err = C.Visit(url)
 	if err != nil {
 		log.Fatal(err)
 	}
