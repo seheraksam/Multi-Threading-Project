@@ -87,27 +87,3 @@ func main() {
 		log.Fatal(err)
 	}
 }
-
-func Scraper() {
-
-	C.OnScraped(func(r *colly.Response) {
-
-		// open the CSV file
-		file, err := os.Create("productsare.csv")
-		if err != nil {
-			log.Fatalln("Failed to create output CSV file", err)
-		}
-		defer file.Close()
-
-		writer := csv.NewWriter(file)
-
-		headers := []string{
-			"Url",
-			"Image",
-			"Name",
-			"Price",
-		}
-		writer.Write(headers)
-
-	})
-}
